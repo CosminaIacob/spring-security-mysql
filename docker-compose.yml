@@ -3,9 +3,12 @@ version: "3.9"
 volumes:
   postgres_data:
     driver: local
+  pgadmin:
+    driver: local
 
 services:
   postgres:
+    restart: on-failure
     container_name: postgres
     image: postgres:15.3
 #    image: "postgres:13.2"
@@ -19,14 +22,24 @@ services:
       - "5432:5432"
     networks:
       - keycloak
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:7.3
+    volumes:
+      - pgadmin:/var/lib/pgadmin/data
+    env_file:
+      - ./database.local.env
+    ports:
+      - "5050:80"
+    networks:
+      - keycloak
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:21.1
 #    image: jboss/keycloak:16.1.1
     env_file:
       - ./keycloak.local.env
-    command:
-      - start-dev
+    command: start-dev
 #      - start (required in production mode- but you need certificates here)
     ports:
       - "8180:8080"
