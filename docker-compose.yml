@@ -1,55 +1,24 @@
 version: "3.9"
 
 volumes:
-  postgres_data:
-    driver: local
-  pgadmin:
+  mysql:
     driver: local
 
 services:
-  postgres:
-    restart: on-failure
-    container_name: postgres
-    image: postgres:15.3
-#    image: "postgres:13.2"
+  mysql:
+    restart: unless-stopped
+    container_name: mysql
+    image: mysql:8.1.0
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-#      - ./db-data:/var/lib/postgresql/data/
-#      - ./sql:/docker-entrypoint-initdb.d/:ro
+      - mysql:/var/lib/mysql
     env_file:
       - ./database.local.env
     ports:
-      - "5432:5432"
+      - "3306:3306"
     networks:
-      - keycloak
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4:7.3
-    volumes:
-      - pgadmin:/var/lib/pgadmin/data
-    env_file:
-      - ./database.local.env
-    ports:
-      - "5050:80"
-    networks:
-      - keycloak
-  keycloak:
-    container_name: keycloak
-    image: quay.io/keycloak/keycloak:21.1
-#    image: jboss/keycloak:16.1.1
-    env_file:
-      - ./keycloak.local.env
-    command: start-dev
-#      - start (required in production mode- but you need certificates here)
-    ports:
-      - "8180:8080"
-#      - "8787:8787" # debug port
-    depends_on:
-      - postgres
-    networks:
-      - keycloak
+      - mysql
 
 networks:
-  keycloak:
-    name: keycloak
+  mysql:
+    name: mysql
     driver: bridge
